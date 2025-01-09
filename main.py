@@ -2,6 +2,7 @@ import re
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
+
 # Bot Configuration
 API_ID = 23883349  # Replace with your API ID
 API_HASH = "9ae2939989ed439ab91419d66b61a4a4"  # Replace with your API Hash
@@ -12,8 +13,8 @@ ADMIN_ID = 5429071679  # Replace with your Telegram admin ID
 USER_SESSION_STRING = "BQFsblUATJX07DSP4x-GHRCV5iCqW2q8IB1VygaNJDSmZRTKollLBIG6FoW7WdKUGSa6SH-49lNpWRQZIqTvwPkZW1XtdXjGh7e3-Tihb3Tmvu_-V-ZfEVzB0Rrx_P_T0p5x-ahJb0AlL2_wY0J2ygUkJpPU2i_trsOQ3rhkjSWCfCmhAjoyBjTt4KWi500EoLZc2bmaGhLTzE_Ga4fPJ6glEaBrF-WMxfcsJi8GH_pIZFnQ9bKViaGaOR8gv8qGAH14K7YcUKeRHT_5_Ri6dZ0Zup1gmRv5X0K0lOxccuABYgw9pbazw3ZUpXmjJAMk89hcLQJlvET3UKO3pcazJt-MQglBOAAAAAFDmQ8_AA"  # Replace with your user session string
 
 # Initialize Clients
-bot = Client("deleteBot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
-user = Client("userSession", api_id=API_ID, api_hash=API_HASH, session_string=USER_SESSION_STRING)
+bot = Client("bot_session", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+user = Client(":memory:", api_id=API_ID, api_hash=API_HASH, session_string=USER_SESSION_STRING)  # In-memory session
 
 
 async def scrape_messages(channel_username, keyword):
@@ -107,8 +108,8 @@ async def handle_callback_query(client, callback_query: CallbackQuery):
 
 # Run both bot and user clients
 async def main():
-    await user.start()
-    await bot.start()
+    await user.start()  # Start user client
+    await bot.start()   # Start bot client
     print("Bot and User Session are running...")
     await bot.idle()
     await user.stop()
