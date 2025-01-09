@@ -111,9 +111,6 @@ async def main():
     await user.start()  # Start user client
     await bot.start()   # Start bot client
     print("Bot and User Session are running...")
-    await bot.idle()
-    await user.stop()
-    await bot.stop()
 
 
 if __name__ == "__main__":
