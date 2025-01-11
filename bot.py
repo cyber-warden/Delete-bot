@@ -5,11 +5,14 @@ from pyrogram.errors import FloodWait, ChatAdminRequired, UsernameInvalid, PeerI
 import asyncio
 
 # Configuration
-API_ID = os.environ.get("API_ID")
-API_HASH = os.environ.get("API_HASH")
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-SESSION_STRING = os.environ.get("SESSION_STRING")  # Optional, for userbot capabilities
-ADMIN_ID = int(os.environ.get("ADMIN_ID"))
+API_ID = 23883349  # Replace with your API ID
+API_HASH = "9ae2939989ed439ab91419d66b61a4a4"  # Replace with your API Hash
+BOT_TOKEN = "7178702548:AAHSZ4DGLG1tv07WbyofBLoBEgwaxUKdj2A"  # Replace with your bot token
+ADMIN_ID = 5429071679  # Replace with your Telegram admin ID
+
+# User Configuration
+USER_SESSION_STRING = "BQFsblUATJX07DSP4x-GHRCV5iCqW2q8IB1VygaNJDSmZRTKollLBIG6FoW7WdKUGSa6SH-49lNpWRQZIqTvwPkZW1XtdXjGh7e3-Tihb3Tmvu_-V-ZfEVzB0Rrx_P_T0p5x-ahJb0AlL2_wY0J2ygUkJpPU2i_trsOQ3rhkjSWCfCmhAjoyBjTt4KWi500EoLZc2bmaGhLTzE_Ga4fPJ6glEaBrF-WMxfcsJi8GH_pIZFnQ9bKViaGaOR8gv8qGAH14K7YcUKeRHT_5_Ri6dZ0Zup1gmRv5X0K0lOxccuABYgw9pbazw3ZUpXmjJAMk89hcLQJlvET3UKO3pcazJt-MQglBOAAAAAFDmQ8_AA"  # Replace with your user session string
+
 
 # Initialize the bot
 bot = Client("delete_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
