@@ -1,18 +1,16 @@
 import os
+import re
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.errors import FloodWait, ChatAdminRequired, UsernameInvalid, PeerIdInvalid
 import asyncio
 
 # Configuration
-API_ID = 23883349  # Replace with your API ID
-API_HASH = "9ae2939989ed439ab91419d66b61a4a4"  # Replace with your API Hash
-BOT_TOKEN = "7178702548:AAHSZ4DGLG1tv07WbyofBLoBEgwaxUKdj2A"  # Replace with your bot token
-ADMIN_ID = 5429071679  # Replace with your Telegram admin ID
-
-# User Configuration
-SESSION_STRING = "BQFsblUATJX07DSP4x-GHRCV5iCqW2q8IB1VygaNJDSmZRTKollLBIG6FoW7WdKUGSa6SH-49lNpWRQZIqTvwPkZW1XtdXjGh7e3-Tihb3Tmvu_-V-ZfEVzB0Rrx_P_T0p5x-ahJb0AlL2_wY0J2ygUkJpPU2i_trsOQ3rhkjSWCfCmhAjoyBjTt4KWi500EoLZc2bmaGhLTzE_Ga4fPJ6glEaBrF-WMxfcsJi8GH_pIZFnQ9bKViaGaOR8gv8qGAH14K7YcUKeRHT_5_Ri6dZ0Zup1gmRv5X0K0lOxccuABYgw9pbazw3ZUpXmjJAMk89hcLQJlvET3UKO3pcazJt-MQglBOAAAAAFDmQ8_AA"  # Replace with your user session string
-
+API_ID = os.environ.get("API_ID")
+API_HASH = os.environ.get("API_HASH")
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+SESSION_STRING = os.environ.get("SESSION_STRING")
+ADMIN_ID = int(os.environ.get("ADMIN_ID"))
 
 # Initialize the bot
 bot = Client("delete_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
@@ -33,12 +31,13 @@ async def search_messages(client, chat_id, keyword):
     messages = []
     files = []
     videos = []
-    async for message in client.get_chat_history(chat_id):
-        if keyword.lower() in message.text.lower() if message.text else False:
+    pattern = re.compile(keyword, re.IGNORECASE)
+    async for message in client.search_messages(chat_id):
+        if message.text and pattern.search(message.text):
             messages.append(message)
-        elif message.document and keyword.lower() in message.document.file_name.lower():
+        elif message.document and pattern.search(message.document.file_name):
             files.append(message)
-        elif message.video and keyword.lower() in message.video.file_name.lower():
+        elif message.video and pattern.search(message.video.file_name):
             videos.append(message)
     return messages, files, videos
 
@@ -64,7 +63,6 @@ async def start_command(client, message):
 
 @bot.on_message(filters.command("delete") & filters.user(ADMIN_ID))
 async def delete_command(client, message):
-    # Check if the command format is correct
     if len(message.text.split()) != 3:
         await message.reply_text("Invalid format. Use: /delete <channel_link/username/chat_id> <keyword>")
         return
@@ -72,19 +70,19 @@ async def delete_command(client, message):
     _, chat_id, keyword = message.text.split()
 
     try:
-        # Try to get the chat
         chat = await bot.get_chat(chat_id)
         
-        # Check if the bot is an admin in the chat
         if not await is_admin(chat.id, (await bot.get_me()).id):
             await message.reply_text("I need to be an admin in the channel to perform this action.")
             return
 
-        # Use userbot if available, otherwise use bot
         client_to_use = userbot if userbot else bot
 
-        # Search for messages
+        temporary_msg = await message.reply_text("Searching for messages... This may take a while.")
+
         messages, files, videos = await search_messages(client_to_use, chat.id, keyword)
+
+        await temporary_msg.delete()
 
         total_count = len(messages) + len(files) + len(videos)
 
@@ -92,7 +90,6 @@ async def delete_command(client, message):
             await message.reply_text("No matching messages found.")
             return
 
-        # Create inline keyboard
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("DELETE", callback_data=f"delete_{chat.id}_{keyword}"),
              InlineKeyboardButton("CANCEL", callback_data="cancel")]
@@ -127,6 +124,8 @@ async def handle_callback(client, callback_query):
 
         client_to_use = userbot if userbot else bot
 
+        temporary_msg = await callback_query.message.edit_text("Deleting messages... This may take a while.")
+
         messages, files, videos = await search_messages(client_to_use, chat_id, keyword)
 
         messages_deleted = await delete_messages(client_to_use, messages)
@@ -141,9 +140,10 @@ async def handle_callback(client, callback_query):
             f"- Videos Deleted: {videos_deleted}"
         )
 
-        await callback_query.message.edit_text(summary)
+        await temporary_msg.edit_text(summary)
 
 if __name__ == "__main__":
     if userbot:
         userbot.start()
     bot.run()
+
